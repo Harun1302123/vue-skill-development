@@ -1,5 +1,34 @@
 <script setup>
 
+import { ref, defineEmits, defineProps } from 'vue'
+import moment from 'moment'
+
+const formData = ref({
+  title: '',
+  content: ''
+})
+
+const props = defineProps(['postCount']);
+
+const postLength = ref(props.postCount);
+
+const emit = defineEmits(['postCreate']);
+
+function postCreate() {
+  const posts = {
+    id: postLength.value + 1,
+    title: formData.value.title,
+    content: formData.value.content,
+    likes: 0,
+    comments: [],
+    date: moment().format('YYYY-MM-DD HH:mm:ss')
+  };
+
+  formData.value.title = ''
+  formData.value.content = ''
+
+  emit('postCreate', posts);
+}
 </script>
 
 <template>

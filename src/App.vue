@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, provide } from 'vue'
 import moment from 'moment'
 import Posts from './components/Posts.vue'
+import CreatePost from './components/CreatePost.vue'
+import LayoutContent from './components/LayoutContent.vue'
 
 const posts = ref([
   {
@@ -39,14 +41,6 @@ const posts = ref([
   }
 ])
 
-const firstName = 'John'
-const lastName = 'Doe'
-
-const userName = computed(() => {
-  return firstName + ' ' + lastName
-})
-// const userName = ref('Asif Mallik');
-
 function increaseLikeCount(index) {
   posts.value[index].likes++
 }
@@ -55,25 +49,8 @@ function deletePost(index) {
   posts.value.splice(index, 1)
 }
 
-const formData = ref({
-  title: '',
-  content: ''
-})
-
-// function postCreate(event) {
-//   event.preventDefault();
-function postCreate() {
-  posts.value.push({
-    id: posts.value.length + 1,
-    title: formData.value.title,
-    content: formData.value.content,
-    likes: 0,
-    comments: [],
-    date: moment().format('YYYY-MM-DD HH:mm:ss')
-  })
-
-  formData.value.title = ''
-  formData.value.content = ''
+function postCreate(post) {
+  posts.value.push(post)
 }
 
 function addComment(index) {
@@ -114,55 +91,18 @@ watch(
   },
   { deep: true }
 )
+
+provide('posts', posts)
+
+const currentComponent = ref('Posts')
+
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">BAT Blog</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav mb-2 mb-lg-0">
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              {{ userName }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
-              <li><a class="dropdown-item" href="#">Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-
+  <LayoutContent :userName="userName" @changeComponent="(component) => (currentComponent = component)" :currentComponent="currentComponent" />
+  <CreatePost v-if="currentComponent === 'CreatePost'" @postCreate="postCreate" :postCount="posts.length" class="bg-light" />
   <Posts
+    v-else-if="currentComponent === 'Posts'"
     :posts="posts"
     @increaseLikeCount="increaseLikeCount"
     @deletePost="deletePost"

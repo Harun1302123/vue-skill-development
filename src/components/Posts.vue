@@ -1,26 +1,14 @@
 <script setup>
-import { ref, defineProps, computed, defineEmits } from 'vue'
+import { computed, defineEmits, inject } from 'vue'
 import moment from 'moment'
 import CommentSection from './CommentSection.vue'
 
-// const props = defineProps(['posts']);
-const props = defineProps({
-  posts: {
-    type: Array,
-    required: true
-  }
-})
-const posts = ref(props.posts)
+const posts = inject('posts')
 
 const reversedPosts = computed(() => {
   return [...posts.value].reverse()
 })
-// function reversedPosts() {
-//   console.log('Just Testing');
-//   return [...posts.value].reverse();
-// }
 
-// const emit = defineEmits(['increaseLikeCount', 'deletePost', 'addComment', 'deleteComment'])
 const emit = defineEmits({
   increaseLikeCount: null,
   deletePost: null,
@@ -76,6 +64,7 @@ function deletePost(index) {
                 :index="reversedPosts.length - (index + 1)"
                 @addComment="(index) => emit('addComment', index)"
                 @deleteComment="(index, commentIndex) => emit('deleteComment', index, commentIndex)"
+                v-model="post.commentFormData"
               />
 
               <button
